@@ -666,14 +666,22 @@ endif (gflags_FOUND)
 
 if (OS_WINDOWS)
   set (PKGCONFIG_INSTALL_DIR)
-else ()
+else (OS_WINDOWS)
   set (PKGCONFIG_INSTALL_DIR ${_glog_CMake_LIBDIR}/pkgconfig)
-endif ()
+endif (OS_WINDOWS)
 
 if (PKGCONFIG_INSTALL_DIR)
-  configure_file ("cmake/package.pc.in" "${PROJECT_BINARY_DIR}/lib${CPACK_PACKAGE_NAME}.pc" @ONLY)
+  function (configure_pkgconfig_file)
+    # use a function to limit the scope of these variables with rather general names
+    set (prefix "${CMAKE_INSTALL_PREFIX}")
+    set (exec_prefix "\${prefix}")
+    set (libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
+    set (includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    configure_file ("lib${CPACK_PACKAGE_NAME}.pc.in" "${PROJECT_BINARY_DIR}/lib${CPACK_PACKAGE_NAME}.pc" @ONLY)
+  endfunction (configure_pkgconfig_file)
+  configure_pkgconfig_file ()
   install (FILES "${PROJECT_BINARY_DIR}/lib${CPACK_PACKAGE_NAME}.pc" DESTINATION "${PKGCONFIG_INSTALL_DIR}")
-endif ()
+endif (PKGCONFIG_INSTALL_DIR)
 
 configure_package_config_file (glog-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/glog-config.cmake
